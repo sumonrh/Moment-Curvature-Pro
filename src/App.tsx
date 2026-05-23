@@ -317,19 +317,13 @@ export default function App() {
              <SectionToggle value={sectionType} onChange={setSectionType} />
              <button
                onClick={() => setTheme(theme === 'light' ? 'tokyo-night' : 'light')}
-               className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-sm font-bold text-sm select-none"
-               title="Toggle Theme"
+               className="flex items-center justify-center p-3 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-sm select-none hover:scale-[1.05] active:scale-[0.95]"
+               title={theme === 'light' ? "Switch to Tokyo Night Theme" : "Switch to Light Theme"}
              >
                {theme === 'light' ? (
-                 <>
-                   <Moon className="w-4 h-4 text-indigo-600 animate-pulse" />
-                   <span>Tokyo Night</span>
-                 </>
+                 <Moon className="w-5 h-5 text-indigo-600 animate-pulse" />
                ) : (
-                 <>
-                   <Sun className="w-4 h-4 text-amber-500 animate-spin-slow" />
-                   <span>Light Mode</span>
-                 </>
+                 <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" />
                )}
              </button>
           </div>
