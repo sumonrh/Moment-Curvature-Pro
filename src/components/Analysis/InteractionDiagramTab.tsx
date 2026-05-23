@@ -18,7 +18,7 @@ const downloadCSV = (data: any[], filename: string, headers: string[]) => {
   document.body.removeChild(link);
 };
 
-export const InteractionDiagramTab = ({ results, inputs, sectionType }: any) => {
+export const InteractionDiagramTab = ({ results, inputs, sectionType, theme }: any) => {
   const [activeSubTab, setActiveSubTab] = useState('pm'); 
   const [angle, setAngle] = useState(0); 
   const [targetP, setTargetP] = useState(0); 
@@ -151,23 +151,57 @@ export const InteractionDiagramTab = ({ results, inputs, sectionType }: any) => 
               </button>
             </div>
             <div className="flex-grow min-h-0 border border-slate-100 rounded-xl overflow-hidden">
-              <Plot
-                data={[{
-                    type: 'surface', x: grid.Mx, y: grid.My, z: grid.P, opacity: 0.9, colorscale: 'Viridis', showscale: true,
-                    colorbar: { title: 'Pr (kN)', thickness: 15, len: 0.8 },
-                    lighting: { ambient: 0.6, diffuse: 0.9, specular: 0.2, roughness: 0.5 },
-                    contours: { z: { show: true, usecolormap: true, highlightcolor: "#42f4f4", project: { z: true } } }
-                }]}
-                layout={{
-                  autosize: true, margin: { l: 0, r: 0, b: 0, t: 0 },
-                  scene: {
-                    xaxis: { title: 'Mx (kN-m)', gridcolor: '#f1f5f9' }, yaxis: { title: 'My (kN-m)', gridcolor: '#f1f5f9' }, zaxis: { title: 'Pr (kN)', gridcolor: '#f1f5f9' },
-                    camera: { eye: { x: 1.8, y: 1.8, z: 1.2 } }, aspectmode: 'manual', aspectratio: { x: 1, y: 1, z: 1.2 }
-                  },
-                  paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-                }}
-                useResizeHandler={true} style={{ width: '100%', height: '100%' }}
-              />
+              {(() => {
+                const isDark = theme === 'tokyo-night';
+                const gridColor = isDark ? '#2e3248' : '#f1f5f9';
+                const textColor = isDark ? '#a9b1d6' : '#475569';
+                const zeroLineColor = isDark ? '#444b6a' : '#cbd5e1';
+                return (
+                  <Plot
+                    data={[{
+                        type: 'surface', x: grid.Mx, y: grid.My, z: grid.P, opacity: 0.9, colorscale: 'Viridis', showscale: true,
+                        colorbar: { 
+                          title: { text: 'Pr (kN)', font: { color: textColor } }, 
+                          thickness: 15, 
+                          len: 0.8,
+                          tickfont: { color: textColor }
+                        },
+                        lighting: { ambient: 0.6, diffuse: 0.9, specular: 0.2, roughness: 0.5 },
+                        contours: { z: { show: true, usecolormap: true, highlightcolor: "#42f4f4", project: { z: true } } }
+                    }]}
+                    layout={{
+                      autosize: true, margin: { l: 0, r: 0, b: 0, t: 0 },
+                      scene: {
+                        xaxis: { 
+                          title: { text: 'Mx (kN-m)', font: { color: textColor } }, 
+                          gridcolor: gridColor, 
+                          zerolinecolor: zeroLineColor,
+                          tickfont: { color: textColor } 
+                        }, 
+                        yaxis: { 
+                          title: { text: 'My (kN-m)', font: { color: textColor } }, 
+                          gridcolor: gridColor, 
+                          zerolinecolor: zeroLineColor,
+                          tickfont: { color: textColor } 
+                        }, 
+                        zaxis: { 
+                          title: { text: 'Pr (kN)', font: { color: textColor } }, 
+                          gridcolor: gridColor, 
+                          zerolinecolor: zeroLineColor,
+                          tickfont: { color: textColor } 
+                        },
+                        camera: { eye: { x: 1.8, y: 1.8, z: 1.2 } }, 
+                        aspectmode: 'manual', 
+                        aspectratio: { x: 1, y: 1, z: 1.2 }
+                      },
+                      paper_bgcolor: 'rgba(0,0,0,0)', 
+                      plot_bgcolor: 'rgba(0,0,0,0)',
+                      font: { family: 'Inter, system-ui, sans-serif', color: textColor }
+                    }}
+                    useResizeHandler={true} style={{ width: '100%', height: '100%' }}
+                  />
+                );
+              })()}
             </div>
           </div>
         )}

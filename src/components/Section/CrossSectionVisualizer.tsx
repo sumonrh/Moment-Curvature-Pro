@@ -12,13 +12,13 @@ export const CrossSectionVisualizer = ({ sectionType, inputs, isPrintMode = fals
     return isNaN(v) ? 0 : v;
   };
   
-  const colorConcrete = "#f1f5f9", colorConfined = "#cbd5e1", colorSteel = "#1e293b", colorStirrup = "#64748b", colorAxis = "#ef4444"; 
+  const colorConcrete = "var(--color-concrete, #f1f5f9)", colorConfined = "var(--color-confined, #cbd5e1)", colorSteel = "var(--color-steel, #1e293b)", colorStirrup = "var(--color-stirrup, #64748b)", colorAxis = "var(--color-axis, #ef4444)"; 
 
   let shapes: any[] = [], rebars: any[] = [], dims: any[] = [];
 
   if (sectionType === 'circular') {
      const R = D/2, ds = D - 2 * cover - dbt, R_conf = ds / 2, R_bars = R_conf - dbt/2 - db/2;
-     shapes.push(<circle cx={center} cy={center} r={Math.max(0, toPx(R))} fill={colorConcrete} stroke="#94a3b8" strokeWidth="1" key="conc_out" />);
+     shapes.push(<circle cx={center} cy={center} r={Math.max(0, toPx(R))} fill={colorConcrete} stroke="var(--color-slate-400, #94a3b8)" strokeWidth="1" key="conc_out" />);
      if(R_conf > 0) shapes.push(<circle cx={center} cy={center} r={Math.max(0, toPx(R_conf))} fill={colorConfined} stroke={colorStirrup} strokeWidth="1" strokeDasharray="3 2" key="conc_in" />);
      
      const angleStep = (2 * Math.PI) / (n_bars || 1);
@@ -29,13 +29,13 @@ export const CrossSectionVisualizer = ({ sectionType, inputs, isPrintMode = fals
      const dimY = center + toPx(R) + 20;
      dims.push(
         <g key="dim_D">
-           <line x1={center - toPx(R)} y1={dimY} x2={center + toPx(R)} y2={dimY} stroke="#64748b" strokeWidth="1" markerEnd="url(#arrow)" markerStart="url(#arrow)" />
-           <text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">D = {D}</text>
+           <line x1={center - toPx(R)} y1={dimY} x2={center + toPx(R)} y2={dimY} stroke="var(--color-slate-500, #64748b)" strokeWidth="1" markerEnd="url(#arrow)" markerStart="url(#arrow)" />
+           <text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="var(--color-slate-600, #475569)" fontWeight="600">D = {D}</text>
         </g>
      );
   } else {
      const W_px = toPx(B), H_px = toPx(H);
-     shapes.push(<rect x={center - W_px/2} y={center - H_px/2} width={Math.max(0, W_px)} height={Math.max(0, H_px)} fill={colorConcrete} stroke="#94a3b8" strokeWidth="1" key="conc_out" />);
+     shapes.push(<rect x={center - W_px/2} y={center - H_px/2} width={Math.max(0, W_px)} height={Math.max(0, H_px)} fill={colorConcrete} stroke="var(--color-slate-400, #94a3b8)" strokeWidth="1" key="conc_out" />);
      const W_conf = B - 2*cover - dbt, H_conf = H - 2*cover - dbt;
      if(W_conf > 0 && H_conf > 0) {
         const x_conf = center - toPx(W_conf/2);
@@ -79,9 +79,9 @@ export const CrossSectionVisualizer = ({ sectionType, inputs, isPrintMode = fals
      }
 
      const dimY = center + H_px/2 + 20;
-     dims.push(<g key="dim_B"><line x1={center - W_px/2} y1={dimY} x2={center + W_px/2} y2={dimY} stroke="#64748b" strokeWidth="1" /><text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">B = {B}</text></g>);
+     dims.push(<g key="dim_B"><line x1={center - W_px/2} y1={dimY} x2={center + W_px/2} y2={dimY} stroke="var(--color-slate-500, #64748b)" strokeWidth="1" /><text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="var(--color-slate-600, #475569)" fontWeight="600">B = {B}</text></g>);
      const dimX = center + W_px/2 + 20;
-     dims.push(<g key="dim_H"><line x1={dimX} y1={center - H_px/2} x2={dimX} y2={center + H_px/2} stroke="#64748b" strokeWidth="1" /><text x={dimX + 4} y={center} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600" transform={`rotate(90, ${dimX+4}, ${center})`}>H = {H}</text></g>);
+     dims.push(<g key="dim_H"><line x1={dimX} y1={center - H_px/2} x2={dimX} y2={center + H_px/2} stroke="var(--color-slate-500, #64748b)" strokeWidth="1" /><text x={dimX + 4} y={center} textAnchor="middle" fontSize="10" fill="var(--color-slate-600, #475569)" fontWeight="600" transform={`rotate(90, ${dimX+4}, ${center})`}>H = {H}</text></g>);
   }
   
   return (
@@ -89,7 +89,7 @@ export const CrossSectionVisualizer = ({ sectionType, inputs, isPrintMode = fals
         {!isPrintMode && <h4 className="text-sm font-bold text-slate-700 mb-4 w-full text-left">Cross-Section Preview</h4>}
         <div className="flex-grow flex items-center justify-center w-full">
             <svg viewBox={`0 0 ${size} ${size}`} width={isPrintMode ? size : "100%"} height={isPrintMode ? size : "auto"} className="max-w-[280px] max-h-[280px] overflow-visible">
-                <defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#64748b" /></marker></defs>
+                <defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="var(--color-slate-500, #64748b)" /></marker></defs>
                 {shapes}
                 <line x1={center} y1={padding - 10} x2={center} y2={size-padding + 10} stroke={colorAxis} strokeWidth="1" strokeDasharray="6 3" />
                 <text x={center + 6} y={padding - 10} fontSize="11" fill={colorAxis} fontWeight="bold">Y</text>

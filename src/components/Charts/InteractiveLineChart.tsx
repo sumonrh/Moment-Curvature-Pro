@@ -102,8 +102,8 @@ export const InteractiveLineChart = ({ data, xKey, yKey, color = "#2563eb", colo
                 const y = yScale(val);
                 return (
                     <g key={`y-${i}`}>
-                        <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#e2e8f0" strokeWidth="1" />
-                        <text x={padding - 10} y={y + 3} textAnchor="end" fontSize="10" fill="#94a3b8" fontWeight="500">{formatTick(val)}</text>
+                        <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200" strokeWidth="1" />
+                        <text x={padding - 10} y={y + 3} textAnchor="end" fontSize="10" fill="currentColor" className="text-slate-400" fontWeight="500">{formatTick(val)}</text>
                     </g>
                 );
             })}
@@ -111,13 +111,13 @@ export const InteractiveLineChart = ({ data, xKey, yKey, color = "#2563eb", colo
                 const x = xScale(val);
                 return (
                     <g key={`x-${i}`}>
-                        <line x1={x} y1={padding} x2={x} y2={height - padding} stroke="#e2e8f0" strokeWidth="1" />
-                        <text x={x} y={height - padding + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight="500">{formatTick(val)}</text>
+                        <line x1={x} y1={padding} x2={x} y2={height - padding} stroke="currentColor" className="text-slate-200" strokeWidth="1" />
+                        <text x={x} y={height - padding + 16} textAnchor="middle" fontSize="10" fill="currentColor" className="text-slate-400" fontWeight="500">{formatTick(val)}</text>
                     </g>
                 );
             })}
-            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="1.5" />
-            <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="1.5" />
+            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="currentColor" className="text-slate-300" strokeWidth="1.5" />
+            <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="currentColor" className="text-slate-300" strokeWidth="1.5" />
             
             {paths.map((p: any) => <polyline key={p.key} points={p.points} fill="none" stroke={p.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />)}
             
@@ -135,7 +135,7 @@ export const InteractiveLineChart = ({ data, xKey, yKey, color = "#2563eb", colo
 
             {hoverData && !fixedWidth && (
                 <g>
-                <line x1={xScale(hoverData[xKey])} y1={padding} x2={xScale(hoverData[xKey])} y2={height - padding} stroke="#94a3b8" strokeWidth="1" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
+                <line x1={xScale(hoverData[xKey])} y1={padding} x2={xScale(hoverData[xKey])} y2={height - padding} stroke="currentColor" className="text-slate-400" strokeWidth="1" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
                 {yKeys.map((key, i) => {
                   const val = Number(hoverData[key]);
                   if (isNaN(val)) return null;
