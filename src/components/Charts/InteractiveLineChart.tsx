@@ -118,6 +118,13 @@ export const InteractiveLineChart = ({ data, xKey, yKey, color = "#2563eb", colo
             })}
             <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="1.5" />
             <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#cbd5e1" strokeWidth="1.5" />
+
+            {xLabel && (
+                <text x={width / 2} y={height - 14} textAnchor="middle" fontSize="12" fill="#64748b" fontWeight="700">{xLabel}</text>
+            )}
+            {yLabel && (
+                <text x="18" y={height / 2} textAnchor="middle" fontSize="12" fill="#64748b" fontWeight="700" transform={`rotate(-90, 18, ${height / 2})`}>{yLabel}</text>
+            )}
             
             {paths.map((p: any) => <polyline key={p.key} points={p.points} fill="none" stroke={p.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />)}
             

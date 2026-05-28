@@ -55,7 +55,7 @@ export const getSectionGeometry = (sectionType: SectionType, inputs: SectionInpu
     }
   }
 
-  const grid_size = 80;
+  const grid_size = sectionType === 'rectangular' ? 140 : 80;
   const dx = width_total / grid_size;
   const dy = depth_total / grid_size;
   const dA = dx * dy;
@@ -172,6 +172,72 @@ export const getSectionForcesFromStrains = (
   return { P, Mx, My, max_t_strain, max_c_strain };
 };
 
+const getRectangularAxisForcesFromStrains = (
+  geometry: SectionGeometry, inputs: SectionInputs, calcParams: CalculationParams, strainPlane: StrainPlane
+): SectionForces => {
+  const { B, H, cover, dbt, fc, fy, db } = inputs;
+  const { ecu, fcc, ecc } = calcParams;
+  const { eps_top, eps_bot, theta, d_max } = strainPlane;
+  const { bar_coords, x_pc, y_pc } = geometry;
+  const Ec = 5000 * Math.sqrt(fc);
+  const bar_area = Math.PI * Math.pow(db / 2, 2);
+  const isStrongAxis = Math.abs(Math.sin(theta)) > Math.abs(Math.cos(theta));
+  const stripCount = 900;
+  const core_w = Math.max(0, B - 2 * cover - dbt);
+  const core_h = Math.max(0, H - 2 * cover - dbt);
+
+  let P = 0, Mx = 0, My = 0;
+  let max_t_strain = 0, max_c_strain = 0;
+
+  const getStrain = (d: number) => eps_bot + (eps_top - eps_bot) * ((d + d_max) / (2 * d_max));
+
+  for (let i = 0; i < stripCount; i++) {
+    const d0 = -d_max + (2 * d_max * i) / stripCount;
+    const d1 = -d_max + (2 * d_max * (i + 1)) / stripCount;
+    const d = (d0 + d1) / 2;
+    const strain = getStrain(d);
+    if (strain >= 0) continue;
+
+    const stripThickness = d1 - d0;
+    const inCoreDepth = isStrongAxis ? Math.abs(d) <= core_h / 2 : Math.abs(d) <= core_w / 2;
+    const confinedWidth = inCoreDepth ? (isStrongAxis ? core_w : core_h) : 0;
+    const totalWidth = isStrongAxis ? B : H;
+    const unconfinedWidth = Math.max(0, totalWidth - confinedWidth);
+
+    const confinedStress = confinedWidth > 0 ? manderConfined(strain, fc, fcc, ecc, Ec, ecu) : 0;
+    const unconfinedStress = unconfinedWidth > 0 ? manderUnconfined(strain, fc) : 0;
+    const force = confinedStress * confinedWidth * stripThickness + unconfinedStress * unconfinedWidth * stripThickness;
+
+    P += force;
+    if (isStrongAxis) Mx += -force * (d - y_pc);
+    else My += -force * (d - x_pc);
+    if (Math.abs(strain) > max_c_strain) max_c_strain = Math.abs(strain);
+  }
+
+  for (let i = 0; i < bar_coords.length; i++) {
+    const bar = bar_coords[i];
+    const d = isStrongAxis ? bar.y : bar.x;
+    const strain = getStrain(d);
+    const steel_stress = parkSteel(strain, fy);
+    const steel_force = steel_stress * bar_area;
+
+    P += steel_force;
+    Mx += -steel_force * (bar.y - y_pc);
+    My += -steel_force * (bar.x - x_pc);
+    if (strain > 0 && strain > max_t_strain) max_t_strain = strain;
+
+    if (strain < 0) {
+      const conc_stress = bar.in_core ? manderConfined(strain, fc, fcc, ecc, Ec, ecu) : manderUnconfined(strain, fc);
+      const displaced_force = conc_stress * bar_area;
+      P -= displaced_force;
+      Mx -= -displaced_force * (bar.y - y_pc);
+      My -= -displaced_force * (bar.x - x_pc);
+    }
+  }
+
+  return { P, Mx, My, max_t_strain, max_c_strain };
+};
+
 export const calculateUltimateStrain = (sectionType: SectionType, inputs: SectionInputs, properties: any) => {
   const { fc, fy } = inputs;
   const { pcc, ps, fLp } = properties;
@@ -210,32 +276,43 @@ export const analyzeSection = (sectionType: SectionType, inputs: SectionInputs, 
   const target_F = -(inputs.P || 0) * 1000;
   const theta = axis === 'strong' ? Math.PI / 2 : 0;
   const d_max = getAnalyticalDMax(sectionType, inputs, theta);
+  const forceCalculator = sectionType === 'rectangular' ? getRectangularAxisForcesFromStrains : getSectionForcesFromStrains;
   
   const points = 300;
   const curvatures: number[] = [], moments: number[] = [], strainsSteel: number[] = [], strainsConcrete: number[] = [];
   const max_curv = (calcParams.ecu * 1.5) / (0.15 * geometry.depth_total);
+  const forceTolerance = 0.00002 * Math.max(1, Math.abs(target_F), inputs.fc * geometry.Ag);
 
   for (let i = 0; i <= points; i++) {
     const curv = max_curv * Math.pow(i / points, 1.5);
     
-    let ec_min = -0.05, ec_max = 0.05, eps_center = 0;
-    let converged = false, finalForces = null;
+    let ec_min = -0.2, ec_max = 0.2, eps_center = 0;
+    let finalForces: SectionForces | null = null;
+    let bestResidual = Number.POSITIVE_INFINITY;
+    let converged = false;
 
     for (let iter = 0; iter < 60; iter++) {
       const eps_top = eps_center - curv * d_max;
       const eps_bot = eps_center + curv * d_max;
-      const forces = getSectionForcesFromStrains(geometry, inputs, calcParams, { eps_top, eps_bot, theta, d_max });
+      const forces = forceCalculator(geometry, inputs, calcParams, { eps_top, eps_bot, theta, d_max });
       
       const diff = forces.P - target_F;
-      if (Math.abs(diff) < 0.001 * Math.max(1, Math.abs(target_F), inputs.fc * geometry.Ag)) {
-        converged = true; finalForces = forces; break;
+      const residual = Math.abs(diff);
+      if (residual < bestResidual) {
+        bestResidual = residual;
+        finalForces = forces;
+      }
+
+      if (Math.abs(diff) < forceTolerance) {
+        converged = true;
+        break;
       }
       if (diff > 0) { ec_max = eps_center; eps_center = (eps_center + ec_min) / 2; }
       else { ec_min = eps_center; eps_center = (eps_center + ec_max) / 2; }
     }
 
     if (converged || i === 0) {
-      const forces = finalForces || getSectionForcesFromStrains(geometry, inputs, calcParams, { eps_top: eps_center - curv * d_max, eps_bot: eps_center + curv * d_max, theta, d_max });
+      const forces = finalForces || forceCalculator(geometry, inputs, calcParams, { eps_top: eps_center - curv * d_max, eps_bot: eps_center + curv * d_max, theta, d_max });
       curvatures.push(curv * 1000);
       moments.push((axis === 'strong' ? forces.Mx : forces.My) / 1e6);
       strainsSteel.push(forces.max_t_strain * 100);

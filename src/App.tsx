@@ -41,6 +41,33 @@ const downloadCSV = (data: any[], filename: string, headers: string[]) => {
   document.body.removeChild(link);
 };
 
+const smoothSeries = (values: any[], passes = 8) => {
+  let smoothed = values.map((value) => Number(value));
+  for (let pass = 0; pass < passes; pass++) {
+    smoothed = smoothed.map((value, index) => {
+      if (!Number.isFinite(value) || index < 2 || index > smoothed.length - 3) return value;
+      const window = smoothed.slice(index - 2, index + 3);
+      if (window.some((item) => !Number.isFinite(item))) return value;
+      return (window[0] + 2 * window[1] + 3 * window[2] + 2 * window[3] + window[4]) / 9;
+    });
+  }
+  return smoothed;
+};
+
+const interpolateSeries = (xValues: number[], yValues: any[], x: number) => {
+  if (!xValues.length || !yValues.length || x < xValues[0] || x > xValues[xValues.length - 1]) return undefined;
+  let upper = xValues.findIndex((value) => value >= x);
+  if (upper === -1) return undefined;
+  if (upper === 0) return yValues[0];
+
+  const lower = upper - 1;
+  const x0 = xValues[lower], x1 = xValues[upper];
+  const y0 = Number(yValues[lower]), y1 = Number(yValues[upper]);
+  if (!Number.isFinite(y0) || !Number.isFinite(y1)) return undefined;
+  if (x1 === x0) return y1;
+  return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0);
+};
+
 export default function App() {
   const [sectionType, setSectionType] = useState<SectionType>('circular');
   const [inputs, setInputs] = useState<SectionInputs>({
@@ -139,19 +166,22 @@ export default function App() {
     if(!results || !results.mcStrong) return [];
     const mcS = results.mcStrong;
     const mcW = results.mcWeak;
+    const strongMoments = sectionType === 'rectangular' ? smoothSeries(mcS.moments) : mcS.moments;
+    const weakMoments = sectionType === 'rectangular' && mcW ? smoothSeries(mcW.moments) : mcW?.moments;
     return mcS.curvatures.map((c: number, i: number) => ({
        curvature: c,
        rotation: mcS.rotations[i],
-       moment: mcS.moments[i],
+       moment: strongMoments[i],
        strainSteel: mcS.strainsSteel[i],
        strainConc: mcS.strainsConcrete[i],
        ...(mcW ? {
-         momentWeak: mcW.moments[i],
-         strainSteelWeak: mcW.strainsSteel[i],
-         strainConcWeak: mcW.strainsConcrete[i]
+         momentWeak: sectionType === 'rectangular' ? interpolateSeries(mcW.curvatures, weakMoments || [], c) : weakMoments?.[i],
+         momentWeakRotation: sectionType === 'rectangular' ? interpolateSeries(mcW.rotations, weakMoments || [], mcS.rotations[i]) : weakMoments?.[i],
+         strainSteelWeak: sectionType === 'rectangular' ? interpolateSeries(mcW.curvatures, mcW.strainsSteel, c) : mcW.strainsSteel[i],
+         strainConcWeak: sectionType === 'rectangular' ? interpolateSeries(mcW.curvatures, mcW.strainsConcrete, c) : mcW.strainsConcrete[i]
        } : {})
     }));
-  }, [results]);
+  }, [results, sectionType]);
 
   const generateReport = () => {
     if (!results) return;

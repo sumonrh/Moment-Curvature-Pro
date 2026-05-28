@@ -111,13 +111,13 @@ export const RectangularSection = ({ activeTab, results, inputs, setInputs, gene
         <div className="h-[600px] border border-slate-100 rounded-2xl p-6 shadow-sm relative">
            <div className="absolute top-6 right-6 z-10">
               <button 
-                onClick={() => downloadCSV(mergedMomentData, 'moment_rotation_rectangular.csv', ['rotation', 'moment', 'momentWeak'])}
+                onClick={() => downloadCSV(mergedMomentData, 'moment_rotation_rectangular.csv', ['rotation', 'moment', 'momentWeakRotation'])}
                 className="flex items-center gap-2 px-3 py-1.5 bg-white text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm"
               >
                 <Download size={14} /> Download CSV
               </button>
            </div>
-           <InteractiveLineChart data={mergedMomentData} xKey="rotation" yKey={["moment", "momentWeak"]} labels={["Mx", "My"]} title="Moment vs. Rotation (Rectangular)" xLabel="Rotation (rad)" yLabel="Moment (kN-m)"/>
+           <InteractiveLineChart data={mergedMomentData} xKey="rotation" yKey={["moment", "momentWeakRotation"]} labels={["Mx", "My"]} title="Moment vs. Rotation (Rectangular)" xLabel="Rotation (rad)" yLabel="Moment (kN-m)"/>
         </div>
         <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
            <h4 className="text-sm font-bold text-blue-900 uppercase mb-4">Plastic Hinge Parameters (Caltrans SDC)</h4>

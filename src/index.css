@@ -114,7 +114,8 @@
 }
 
 .theme-dark svg text[fill="#94a3b8"],
-.theme-dark svg text[fill="#475569"] {
+.theme-dark svg text[fill="#475569"],
+.theme-dark svg text[fill="#64748b"] {
   fill: #a9b1d6 !important;
 }
 
