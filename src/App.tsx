@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Activity, Settings, FileText, Download, 
   TrendingUp, RotateCw, Box, HelpCircle, 
-  Info, AlertTriangle, Mail, Calculator,
-  Sun, Moon
+  Info, AlertTriangle, Mail, Calculator
 } from 'lucide-react';
 
 // Modular Imports
@@ -43,23 +42,6 @@ const downloadCSV = (data: any[], filename: string, headers: string[]) => {
 };
 
 export default function App() {
-  const [theme, setTheme] = useState<'light' | 'tokyo-night'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as 'light' | 'tokyo-night') || 'light';
-    }
-    return 'light';
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'tokyo-night') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
   const [sectionType, setSectionType] = useState<SectionType>('circular');
   const [inputs, setInputs] = useState<SectionInputs>({
     code: 'CSA',
@@ -313,19 +295,8 @@ export default function App() {
             </h1>
             <p className="text-slate-500 text-sm md:text-base mt-1">Advanced nonlinear cross-section analysis for reinforced concrete columns.</p>
           </div>
-          <div className="mt-4 md:mt-0 flex flex-wrap gap-4 items-center">
+          <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-4 items-center">
              <SectionToggle value={sectionType} onChange={setSectionType} />
-             <button
-               onClick={() => setTheme(theme === 'light' ? 'tokyo-night' : 'light')}
-               className="flex items-center justify-center p-3 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-sm select-none hover:scale-[1.05] active:scale-[0.95]"
-               title={theme === 'light' ? "Switch to Tokyo Night Theme" : "Switch to Light Theme"}
-             >
-               {theme === 'light' ? (
-                 <Moon className="w-5 h-5 text-indigo-600 animate-pulse" />
-               ) : (
-                 <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" />
-               )}
-             </button>
           </div>
         </div>
 
@@ -395,7 +366,7 @@ export default function App() {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-h-[600px] p-4 md:p-8 relative">
               {results && !results.error ? (
                 <>
-                  {activeTab === 'interaction' && <InteractionDiagramTab results={results} inputs={inputs} sectionType={sectionType} theme={theme} />}
+                  {activeTab === 'interaction' && <InteractionDiagramTab results={results} inputs={inputs} sectionType={sectionType} />}
                   
                   {['summary', 'mc', 'mr'].includes(activeTab) && (
                     <>
