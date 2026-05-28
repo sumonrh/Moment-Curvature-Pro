@@ -1,6 +1,7 @@
 import { SectionInputs, SectionType } from '../types';
 import { calcRectangularPMPoint } from './rectangular';
 import { calcCircularPMPoint } from './circular';
+import { findInteractionPointAtP } from './shared';
 
 export const calculateInteractionDiagram = (sectionType: SectionType, inputs: SectionInputs) => {
   const { fc, fy, code, cover, db, dbt, D, B, H, n_bars, nx, ny } = inputs;
@@ -49,10 +50,11 @@ export const calculateInteractionDiagram = (sectionType: SectionType, inputs: Se
 
   const theta_steps = 72;
   const angles = Array.from({length: theta_steps + 1}, (_, i) => i * (360 / theta_steps));
-  const cVals = [];
-  const maxC = (isRect ? Math.max(B,H) : D) * 3;
-  for (let i = 40; i >= 1; i--) cVals.push(maxC * Math.pow(i/40, 2));
-  cVals.push(0.1);
+  const pSteps = 41;
+  const pVals = Array.from({length: pSteps}, (_, i) => {
+    const ratio = (1 - Math.cos(Math.PI * (i + 1) / (pSteps + 1))) / 2;
+    return Prmax - ratio * (Prmax - Prt);
+  });
 
   const grid = { P: [], Mx: [], My: [] };
   const surface = [];
@@ -63,15 +65,12 @@ export const calculateInteractionDiagram = (sectionType: SectionType, inputs: Se
     const rowP = [], rowMx = [], rowMy = [];
     rowP.push(Prmax); rowMx.push(0); rowMy.push(0);
     
-    for (let c of cVals) {
-      const pt = calcPMPoint(t, c, inputs, phic, phis, bars);
-      let p = pt.P;
-      if (p > Prmax) p = Prmax; 
-      if (p < Prt) p = Prt;
-      rowP.push(p);
-      rowMx.push(pt.Mx);
-      rowMy.push(pt.My);
-      surface.push({ p, mx: pt.Mx, my: pt.My, theta: t * Math.PI / 180 });
+    for (let pTarget of pVals) {
+      const pt = findInteractionPointAtP(t * Math.PI / 180, pTarget, sectionType, inputs, phic, phis, bars, Prmax, Prt, calcPMPoint);
+      rowP.push(pTarget);
+      rowMx.push(pt.mx);
+      rowMy.push(pt.my);
+      surface.push({ p: pTarget, mx: pt.mx, my: pt.my, theta: t * Math.PI / 180 });
     }
     
     rowP.push(Prt); rowMx.push(0); rowMy.push(0);
@@ -80,5 +79,5 @@ export const calculateInteractionDiagram = (sectionType: SectionType, inputs: Se
     grid.My.push(rowMy);
   }
 
-  return { surface, p_ro: Pro, p_r_max: Prmax, p_r_tension: Prt, grid, theta_steps, t_steps: cVals.length + 2, bars, phic, phis };
+  return { surface, p_ro: Pro, p_r_max: Prmax, p_r_tension: Prt, grid, theta_steps, t_steps: pVals.length + 2, bars, phic, phis };
 };
