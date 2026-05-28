@@ -356,10 +356,12 @@ export default function App() {
                   <h4 className="text-xs font-bold text-blue-600 uppercase mb-3">Geometry</h4>
                   <div className="grid grid-cols-1 gap-4">
                     {sectionType === 'circular' ? (
-                       <InputField label="Diameter (D)" value={inputs.D} onChange={(v: number) => setInputs({...inputs, D: v})} unit="mm" />
+                      <InputField label="Diameter (D)" value={inputs.D} onChange={(v: number) => setInputs({...inputs, D: v})} unit="mm" />
                     ) : (
-                       <><InputField label="Width (B)" value={inputs.B} onChange={(v: number) => setInputs({...inputs, B: v})} unit="mm" />
-                       <InputField label="Depth (H)" value={inputs.H} onChange={(v: number) => setInputs({...inputs, H: v})} unit="mm" /></>
+                      <>
+                        <InputField label="Width (B)" value={inputs.B} onChange={(v: number) => setInputs({...inputs, B: v})} unit="mm" />
+                        <InputField label="Depth (H)" value={inputs.H} onChange={(v: number) => setInputs({...inputs, H: v})} unit="mm" />
+                      </>
                     )}
                     <InputField label="Cover" value={inputs.cover} onChange={(v: number) => setInputs({...inputs, cover: v})} unit="mm" />
                   </div>
@@ -369,10 +371,12 @@ export default function App() {
                   <h4 className="text-xs font-bold text-blue-600 uppercase mb-3">Rebar</h4>
                   <div className="grid grid-cols-1 gap-4">
                     {sectionType === 'circular' ? (
-                       <InputField label="No. Bars" value={inputs.n_bars} onChange={(v: number) => setInputs({...inputs, n_bars: Math.max(0, Math.round(v))})} unit="qty" />
+                      <InputField label="No. Bars" value={inputs.n_bars} onChange={(v: number) => setInputs({...inputs, n_bars: Math.max(0, Math.round(v))})} unit="qty" />
                     ) : (
-                       <><InputField label="Bars (nx)" value={inputs.nx} onChange={(v: number) => setInputs({...inputs, nx: Math.max(0, Math.round(v))})} unit="qty" />
-                       <InputField label="Bars (ny)" value={inputs.ny} onChange={(v: number) => setInputs({...inputs, ny: Math.max(0, Math.round(v))})} unit="qty" /></>
+                      <>
+                        <InputField label="Bars (nx)" value={inputs.nx} onChange={(v: number) => setInputs({...inputs, nx: Math.max(0, Math.round(v))})} unit="qty" />
+                        <InputField label="Bars (ny)" value={inputs.ny} onChange={(v: number) => setInputs({...inputs, ny: Math.max(0, Math.round(v))})} unit="qty" />
+                      </>
                     )}
                     <InputField label="Bar Dia (db)" value={inputs.db} onChange={(v: number) => setInputs({...inputs, db: v})} unit="mm" />
                     <InputField label="Tie/Spiral Dia" value={inputs.dbt} onChange={(v: number) => setInputs({...inputs, dbt: v})} unit="mm" />
@@ -402,7 +406,14 @@ export default function App() {
 
           <div className="lg:col-span-9 space-y-6">
             <div className="flex space-x-2 bg-white p-1.5 rounded-xl border border-slate-200 w-fit shadow-sm overflow-x-auto">
-              {[{ id: 'summary', label: 'Summary' }, { id: 'mc', label: 'M-C' }, { id: 'mr', label: 'Rotation' }, { id: 'interaction', label: 'Interaction' }, { id: 'materials', label: 'Materials' }, { id: 'help', label: 'Help' }].map(tab => (
+              {[
+                { id: 'summary', label: 'Summary' },
+                { id: 'mc', label: 'M-C' },
+                { id: 'mr', label: 'Rotation' },
+                { id: 'interaction', label: 'Interaction' },
+                { id: 'materials', label: 'Materials' },
+                { id: 'help', label: 'Help' }
+              ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}>{tab.label}</button>
               ))}
             </div>

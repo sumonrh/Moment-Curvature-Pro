@@ -79,9 +79,9 @@ export const CrossSectionVisualizer = ({ sectionType, inputs, isPrintMode = fals
      }
 
      const dimY = center + H_px/2 + 20;
-     dims.push(<g key="dim_B"><line x1={center - W_px/2} y1={dimY} x2={center + W_px/2} y2={dimY} stroke="#64748b" strokeWidth="1" /><text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">B = {B}</text></g>);
+     dims.push(<g key="dim_B"><line x1={center - W_px/2} y1={dimY} x2={center + W_px/2} y2={dimY} stroke="#64748b" strokeWidth="1" markerEnd="url(#arrow)" markerStart="url(#arrow)" /><text x={center} y={dimY + 12} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">B = {B}</text></g>);
      const dimX = center + W_px/2 + 20;
-     dims.push(<g key="dim_H"><line x1={dimX} y1={center - H_px/2} x2={dimX} y2={center + H_px/2} stroke="#64748b" strokeWidth="1" /><text x={dimX + 4} y={center} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600" transform={`rotate(90, ${dimX+4}, ${center})`}>H = {H}</text></g>);
+     dims.push(<g key="dim_H"><line x1={dimX} y1={center - H_px/2} x2={dimX} y2={center + H_px/2} stroke="#64748b" strokeWidth="1" markerEnd="url(#arrow)" markerStart="url(#arrow)" /><text x={dimX + 4} y={center} textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600" transform={`rotate(90, ${dimX+4}, ${center})`}>H = {H}</text></g>);
   }
   
   return (
