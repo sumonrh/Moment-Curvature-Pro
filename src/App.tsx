@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Activity, Settings, FileText, Download, 
   TrendingUp, RotateCw, Box, HelpCircle, 
-  Info, AlertTriangle, Mail, Calculator
+  Info, AlertTriangle, Mail, Calculator, Moon, Sun
 } from 'lucide-react';
 
 // Modular Imports
@@ -52,6 +52,11 @@ export default function App() {
 
   const [results, setResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('summary');
+  const [isDarkTheme, setIsDarkTheme] = useState(() => localStorage.getItem('theme') === 'tokyo-night');
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkTheme ? 'tokyo-night' : 'light');
+  }, [isDarkTheme]);
 
   useEffect(() => {
     try {
@@ -284,7 +289,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-2 md:p-8 font-sans text-slate-800">
+    <div className={`min-h-screen bg-slate-100 p-2 md:p-8 font-sans text-slate-800 transition-colors duration-300 ${isDarkTheme ? 'theme-dark' : ''}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         
         <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -296,6 +301,15 @@ export default function App() {
             <p className="text-slate-500 text-sm md:text-base mt-1">Advanced nonlinear cross-section analysis for reinforced concrete columns.</p>
           </div>
           <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-4 items-center">
+             <button
+               type="button"
+               onClick={() => setIsDarkTheme((value) => !value)}
+               className="theme-toggle flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all hover:bg-slate-100 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+               aria-label={isDarkTheme ? 'Switch to light theme' : 'Switch to Tokyo Night theme'}
+               title={isDarkTheme ? 'Switch to light theme' : 'Switch to Tokyo Night theme'}
+             >
+               {isDarkTheme ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
+             </button>
              <SectionToggle value={sectionType} onChange={setSectionType} />
           </div>
         </div>
